@@ -5,8 +5,9 @@
 
 int main() {
     WSADATA wsa;
-    SOCKET server_socket;
-    struct sockaddr_in server_addr;
+    SOCKET server_socket, client_socket;
+    struct sockaddr_in server_addr, client_addr;
+    int client_addrlen = sizeof(client_addr);
 
     // init winsock
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
@@ -48,6 +49,19 @@ int main() {
     }
     printf("Server is listening for connections...\n");
 
+    while (1) {
+        // Accept
+        client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &client_addrlen);
+        if (client_socket == INVALID_SOCKET) {
+            printf("Accept failed. Error Code: %d\n", WSAGetLastError());
+            continue;
+        }
+        printf("Connection accepted from %s:%d\n",
+               inet_ntoa(client_addr.sin_addr),
+               ntohs(client_addr.sin_port));
+
+        closesocket(client_socket);
+    }
     //clean up
     closesocket(server_socket);
     WSACleanup();
