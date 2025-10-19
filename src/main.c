@@ -37,6 +37,17 @@ int main() {
         return 1;
     }
 
+    printf("Socket successfully bound to port %d\n", PORT);
+
+    // Listening
+    if (listen(server_socket, SOMAXCONN) == SOCKET_ERROR) {
+        printf("Listen failed. Error Code: %d\n", WSAGetLastError());
+        closesocket(server_socket);
+        WSACleanup();
+        return 1;
+    }
+    printf("Server is listening for connections...\n");
+
     //clean up
     closesocket(server_socket);
     WSACleanup();
