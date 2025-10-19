@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <winsock2.h>
 
 #define PORT 8000
@@ -11,6 +12,12 @@ int main() {
     int client_addrlen = sizeof(client_addr);
     char buffer[BUFFER_SIZE];
     int bytes_received;
+
+    //HTTP Response
+    char resp[] = "HTTP/1.0 200 OK\r\n"
+                  "Server: webserver-c\r\n"
+                  "Content-type: text/html\r\n\r\n"
+                  "<html>The server sent this HTML!</html>\r\n";
 
     // init winsock
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
@@ -75,6 +82,16 @@ int main() {
 
         buffer[bytes_received] = '\0'; // Null terminate
         printf("Received: %s\n", buffer);
+
+        //write
+        int bytes_sent = send(client_socket, resp, strlen(resp), 0);
+        if (bytes_sent == SOCKET_ERROR) {
+            printf("send failed. Error Code: %d\n", WSAGetLastError());
+            closesocket(client_socket);
+            continue;
+        }
+
+        printf("Response sent successfully (%d bytes)\n", bytes_sent);
 
 
         closesocket(client_socket);
