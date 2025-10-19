@@ -2,12 +2,15 @@
 #include <winsock2.h>
 
 #define PORT 8000
+#define BUFFER_SIZE 1024
 
 int main() {
     WSADATA wsa;
     SOCKET server_socket, client_socket;
     struct sockaddr_in server_addr, client_addr;
     int client_addrlen = sizeof(client_addr);
+    char buffer[BUFFER_SIZE];
+    int bytes_received;
 
     // init winsock
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
@@ -59,6 +62,20 @@ int main() {
         printf("Connection accepted from %s:%d\n",
                inet_ntoa(client_addr.sin_addr),
                ntohs(client_addr.sin_port));
+
+        //Read
+        bytes_received = recv(client_socket, buffer, 
+        BUFFER_SIZE - 1, 0);
+
+        if (bytes_received == SOCKET_ERROR) {
+            printf("recv failed. Error Code: %d\n", WSAGetLastError());
+            closesocket(client_socket);
+            continue;
+        }
+
+        buffer[bytes_received] = '\0'; // Null terminate
+        printf("Received: %s\n", buffer);
+
 
         closesocket(client_socket);
     }
