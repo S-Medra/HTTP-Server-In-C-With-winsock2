@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <winsock2.h>
 
+#define PORT 8000
+
 int main() {
     WSADATA wsa;
     SOCKET server_socket;
+    struct sockaddr_in server_addr;
 
     // init winsock
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
@@ -21,8 +24,21 @@ int main() {
 
     printf("Socket created successfully\n");
 
-    printf("Winsock initialized successfully\n");
+   // Config the address struct
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(PORT);
+    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    
+    //binding
+    if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == SOCKET_ERROR) {
+        printf("Bind failed. Error Code: %d\n", WSAGetLastError());
+        closesocket(server_socket);
+        WSACleanup();
+        return 1;
+    }
 
+    //clean up
+    closesocket(server_socket);
     WSACleanup();
 
     return 0;
